@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 办公助理 · Smart Office Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="bot-avatar">🤖</div>
+  <div class="header-info">
+    <h1>AI 办公助理</h1>
+    <p>Smart Office Bot · 在线</p>
+  </div>
+  <div class="header-badge">
+    <span class="badge">MiniMax API</span>
+    <span class="badge prompt-badge" onclick="toggleModal()">📋 System Prompt</span>
+  </div>
+</div>
+
+<!-- Chat Area -->
+<div class="chat-container" id="chatContainer">
+  <div class="welcome" id="welcome">
+    <div class="welcome-icon">🤖</div>
+    <h2>你好，我是你的 AI 办公助理</h2>
+    <p>我可以帮你整理周报、生成会议纪要、提取待办事项、撰写邮件，让办公更高效。</p>
+    <div class="capabilities">
+      <div class="cap-item" onclick="sendQuick('帮我把这段工作记录整理成周报：本周完成了用户调研报告，和设计团队对齐了V2版本需求，修复了3个线上bug')">
+        <div class="cap-icon">📝</div>
+        <div class="cap-title">周报整理</div>
+        <div class="cap-desc">碎片记录 → 专业周报</div>
+      </div>
+      <div class="cap-item" onclick="sendQuick('帮我从以下会议记录中提取待办事项和责任人：会上决定由张三负责下周完成API对接，李四负责出设计稿，王五跟进客户反馈')">
+        <div class="cap-icon">✅</div>
+        <div class="cap-title">待办提取</div>
+        <div class="cap-desc">会议记录 → 待办清单</div>
+      </div>
+      <div class="cap-item" onclick="sendQuick('帮我写一封邮件，通知团队下周三下午2点开产品评审会，需要各模块负责人准备进度汇报')">
+        <div class="cap-icon">📧</div>
+        <div class="cap-title">邮件撰写</div>
+        <div class="cap-desc">简单描述 → 专业邮件</div>
+      </div>
+      <div class="cap-item" onclick="sendQuick('请帮我整理以下会议记录生成纪要：今天讨论了Q2的OKR，产品目标是DAU提升20%，技术目标是接口响应时间降到200ms以内，运营计划做三场直播活动')">
+        <div class="cap-icon">📋</div>
+        <div class="cap-title">会议纪要</div>
+        <div class="cap-desc">讨论内容 → 结构化纪要</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typing Indicator -->
+  <div class="typing-indicator" id="typingIndicator">
+    <div class="msg-avatar bot">🤖</div>
+    <div class="typing-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions" id="quickActions" style="display:none;">
+  <button class="quick-btn" onclick="sendQuick('帮我整理成周报格式')">📝 整理周报</button>
+  <button class="quick-btn" onclick="sendQuick('提取待办事项')">✅ 提取待办</button>
+  <button class="quick-btn" onclick="sendQuick('帮我润色一下')">✨ 润色文案</button>
+  <button class="quick-btn" onclick="sendQuick('帮我翻译成英文')">🌐 翻译英文</button>
+</div>
+
+<!-- Input Area -->
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="userInput" placeholder="输入消息，让 AI 助理帮你处理办公任务…" rows="1" onkeydown="handleKey(event)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="input-hint">Powered by MiniMax API · 按 Enter 发送 · Shift+Enter 换行</div>
+</div>
+
+<!-- System Prompt Modal -->
+<div class="modal-overlay" id="promptModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📋 System Prompt 设计</h2>
+      <button class="modal-close" onclick="toggleModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="prompt-section">
+        <div class="prompt-label">角色设定</div>
+        <div class="prompt-content">你是一名专业的 AI 办公助理，名叫"小智"。你擅长将碎片化的工作信息整理为结构清晰、表达专业的文档。你的语气专业、友好、简洁。</div>
+      </div>
+      <div class="prompt-section">
+        <div class="prompt-label">能力范围</div>
+        <div class="prompt-content">你可以帮助用户处理以下办公任务：
+1. 周报/日报整理：将散乱的工作记录整理为格式规范的周报
+2. 会议纪要生成：从会议记录中提取关键信息，生成结构化纪要
+3. 待办事项提取：从对话或文档中识别任务、责任人和截止日期
+4. 邮件/消息撰写：根据简要描述生成专业的工作沟通文案
+5. 文案润色：优化表达，使文字更专业简洁</div>
+      </div>
+      <div class="prompt-section">
+        <div class="prompt-label">输出要求</div>
+        <div class="prompt-content">- 回复语言与用户输入保持一致
+- 使用结构化格式（标题、列表、分段）
+- 每条事项以动词开头（完成、推进、对齐、输出）
+- 信息不足时注明"信息不足，请补充"，不编造内容
+- 控制回复长度，避免冗余</div>
+      </div>
+      <div class="prompt-section">
+        <div class="prompt-label">边界规则</div>
+        <div class="prompt-content">- 仅处理办公相关任务，超出范围礼貌拒绝
+- 不提供医疗、法律、金融等专业建议
+- 不讨论政治敏感话题
+- 涉及敏感信息时提醒用户注意数据安全
+- 不确定的内容如实说明，不编造事实</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

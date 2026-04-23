@@ -1,0 +1,15 @@
+{
+  "name": "ai-office-assistant",
+  "version": "1.0.0",
+  "description": "AI 办公助理 · Smart Office Bot - 基于 MiniMax API 的智能办公聊天机器人",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  }
+}
